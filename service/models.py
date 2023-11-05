@@ -85,5 +85,8 @@ class Service(models.Model):
         super(Service, self).save(*args, **kwargs)
 
 
-
-
+class UsersApplied(models.Model):
+    service = models.ForeignKey(Service, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    resume = models.CharField(max_length=200)
+    appliedAt = models.DateTimeField(auto_now_add=True)

@@ -5,10 +5,11 @@ from rest_framework import status
 from django.db.models import Avg, Min, Max, Count
 from rest_framework.pagination import PageNumberPagination
 
+from django.utils import timezone
 from rest_framework.permissions import IsAuthenticated
 
-from .serializers import ServiceSerializer
-from .models import Service
+from .serializers import ServiceSerializer, UsersAppliedSerializer
+from .models import Service, UsersApplied
 
 from django.shortcuts import get_object_or_404
 from .filters import ServicesFilter
@@ -108,4 +109,91 @@ def getTopicStats(request, topic):
     )
 
     return Response(stats)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def applyToService(request, pk):
+
+    user = request.user
+    service = get_object_or_404(Service, id=pk)
+
+    if user.userprofile.resume == '':
+        return Response({ 'error': 'upload your CV first' }, status=status.HTTP_400_BAD_REQUEST)
+
+    if service.lastDate < timezone.now():
+        return Response({ 'error': 'You can not apply to this service. Too late.' }, status=status.HTTP_400_BAD_REQUEST)
+
+    alreadyApplied = service.usersapplied_set.filter(user=user).exists()
+
+    if alreadyApplied:
+        return Response({ 'error': ' already applied.' }, status=status.HTTP_400_BAD_REQUEST)
+
+
+    serviceApplied = UsersApplied.objects.create(
+        service = service,
+        user = user,
+        resume = user.userprofile.resume
+    )
+
+    return Response({
+        'applied': True,
+        'service_id': serviceApplied.id
+    },
+    status=status.HTTP_200_OK
+    )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getCurrentUserAppliedServices(request):
+
+    args = { 'user_id': request.user.id }
+
+    services = UsersApplied.objects.filter(**args)
+
+    serializer = UsersAppliedSerializer(services, many=True)
+
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def isApplied(request, pk):
+
+    user = request.user
+    service = get_object_or_404(Service, id=pk)
+
+    applied = service.usersapplied_set.filter(user=user).exists()
+
+    return Response(applied)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getCurrentUserServices(request):
+
+    args = { 'user': request.user.id }
+
+    services = Service.objects.filter(**args)
+    serializer = ServiceSerializer(services, many=True)
+
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getUsersApplied(request, pk):
+
+    user = request.user
+    service = get_object_or_404(Service, id=pk)
+
+    if service.user != user:
+        return Response({ 'error': 'You can not view this service' }, status=status.HTTP_403_FORBIDDEN)
+
+    users = service.usersapplied_set.all()
+
+    serializer = UsersAppliedSerializer(users, many=True)
+
+    return Response(serializer.data)
 
