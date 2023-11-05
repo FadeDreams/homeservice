@@ -10,7 +10,6 @@ load_dotenv()
 
 from django.contrib.gis.db import models as gismodels
 from django.contrib.gis.geos import Point
-
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 class ServiceType(models.TextChoices):

@@ -1,9 +1,11 @@
 from django.shortcuts import render
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Avg, Min, Max, Count
 from rest_framework.pagination import PageNumberPagination
+
+from rest_framework.permissions import IsAuthenticated
 
 from .serializers import ServiceSerializer
 from .models import Service
@@ -17,11 +19,11 @@ from .filters import ServicesFilter
 def getAllServices(request):
     filterset = ServicesFilter(request.GET, queryset=Service.objects.all().order_by('id'))
     count = filterset.qs.count()
+    # Pagination
     resPerPage = 3
     paginator = PageNumberPagination()
     paginator.page_size = resPerPage
     queryset = paginator.paginate_queryset(filterset.qs, request)
-
     serializer = ServiceSerializer(queryset, many=True)
     return Response({
         "count": count,
@@ -38,18 +40,22 @@ def getService(request, pk):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def newService(request):
+    request.data['user'] = request.user
     data = request.data
-
     service = Service.objects.create(**data)
-
     serializer = ServiceSerializer(service, many=False)
     return Response(serializer.data)
 
 
 @api_view(['PUT'])
+@permission_classes([IsAuthenticated])
 def updateService(request, pk):
     service = get_object_or_404(Service, id=pk)
+
+    if service.user != request.user:
+        return Response({ 'message': 'You can not update this service' }, status=status.HTTP_403_FORBIDDEN)
 
     service.title = request.data['title']
     service.description = request.data['description']
@@ -71,8 +77,12 @@ def updateService(request, pk):
 
 
 @api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
 def deleteService(request, pk):
     service = get_object_or_404(Service, id=pk)
+
+    if service.user != request.user:
+        return Response({ 'message': 'You can not delete this service' }, status=status.HTTP_403_FORBIDDEN)
 
     service.delete()
 
