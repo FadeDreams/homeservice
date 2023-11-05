@@ -16,7 +16,7 @@ urlpatterns = [
 
 
 
-handler404 = 'utils.error_views.error_404'
-handler403 = 'utils.error_views.error_403'
-handler400 = 'utils.error_views.error_400'
-handler500 = 'utils.error_views.error_500'
+# handler404 = 'utils.error_views.error_404'
+# handler403 = 'utils.error_views.error_403'
+# handler400 = 'utils.error_views.error_400'
+# handler500 = 'utils.error_views.error_500'
