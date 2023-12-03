@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      args:
+        - DEV=true
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app
+    command: >
+      sh -c "python manage.py wait_db &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    environment:
+      - DB_HOST=dbpg14
+      - DB_NAME=hsdb
+      - DB_USER=hs
+      - DB_PASS=hs
+    depends_on:
+      - dbpg14
+
+  dbpg14:
+    image: postgres:14-alpine
+    volumes:
+      - fitnessdbdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=dbpg14
+      - POSTGRES_USER=hs
+      - POSTGRES_PASSWORD=hs
+
+volumes:
+  fitnessdbdata:
+

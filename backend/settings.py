@@ -109,16 +109,16 @@ WSGI_APPLICATION = 'backend.wsgi.application'
     # }
 # }
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': os.environ.get('DATABASE_NAME'),
-        'USER': os.environ.get('DATABASE_USER'),
-        'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
-        'HOST': os.environ.get('DATABASE_HOST'),
-        'PORT': os.environ.get('DATABASE_PORT')
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.contrib.gis.db.backends.postgis',
+#         'NAME': os.environ.get('DATABASE_NAME'),
+#         'USER': os.environ.get('DATABASE_USER'),
+#         'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
+#         'HOST': os.environ.get('DATABASE_HOST'),
+#         'PORT': os.environ.get('DATABASE_PORT')
+#     }
+# }
 
 # DATABASES = {
     # 'default': {
@@ -130,6 +130,19 @@ DATABASES = {
         # 'PORT': '5432',
     # }
 # }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        # 'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'dmcvdb',
+        'USER': 'dmcv',
+        'PASSWORD': 'dmcv',
+        'HOST': 'dbpg14',
+        # 'HOST': '172.26.0.2',
+        'PORT': '5432',
+    }
+}
 
 GDAL_LIBRARY_PATH = '/usr/lib/libgdal.so'  # Replace this path with the actual path to your libgdal.so library
 GEOS_LIBRARY_PATH = '/usr/lib/libgdal.so'  # Replace this path with the actual path to your libgdal.so library
